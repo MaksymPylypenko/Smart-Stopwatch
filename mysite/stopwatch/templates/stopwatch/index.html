@@ -1,0 +1,9 @@
+{% if records %}
+    <ul>
+    {% for record in records %}
+        <li><a href="/stopwatch/{{ record.id }}/">{{ record.description }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No stopwatches are available.</p>
+{% endif %}
