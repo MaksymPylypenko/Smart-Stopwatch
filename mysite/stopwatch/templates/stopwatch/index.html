@@ -1,7 +1,10 @@
+Hi {{user.username}},   <a href="{% url 'logout' %}?next=/accounts/login/">logout</a></p>      
+
+
 {% if records %}
     <ul>
     {% for record in records %}
-        <li><a href="/stopwatch/{{ record.id }}/">{{ record.description }}</a></li>
+        <li>{{ record.activity }}, start time = {{ record.start_time}}, duration = {{ record.duration}}</a></li>
     {% endfor %}
     </ul>
 {% else %}
