@@ -1,19 +1,13 @@
-from django.http import HttpResponse
-from django.template import loader
+from django.shortcuts import render
 from .models import Record
 
 from django.contrib.auth.decorators import login_required
 
 @login_required
 def index(request):
-    # '-' indicates a descending order
-    #records = Record.objects.order_by('-start_time')[:5]
-    records = Record.objects.filter(user=request.user)
-    template = loader.get_template('stopwatch/index.html')
-    context = {
-        'records':records,
-    }
-    return HttpResponse(template.render(context, request))
+    records = Record.objects.filter(user=request.user)    
+    context = {'records':records}    
+    return render(request, 'stopwatch/index.html', context)
     
 def chart(request, id):
     return HttpResponse("Details for record %s" % id)

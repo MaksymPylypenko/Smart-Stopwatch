@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stopwatch</title>
+ 
+  <!-- Font -->
+ <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+ 
+ <!-- Styles -->  
+  <link rel="stylesheet" href="style.css">    
+</head>
+
+
+<body>  
+	<h1>Hello, Maksym</h1>	
+	<input type="text" id="question" placeholder="What is your next activity?"> 
+	
+	<div id="clock">
+	 0s:0
+	</div>
+	
+	<button class="button" id="start_btn" onclick="startClock()">START</button>
+	<button class="button" id="start_btn" onclick="resetClock()">RESET</button>
+	<button class="button" id="save_btn" onclick="addRow()">SAVE</button> 
+	
+	
+	<table id="records_table">
+		<tr>
+			<th class="record_title">Activity</th>
+			<th class="record_title">Start time</th>
+			<th class="record_title">Duration</th>
+			<th class="record_title">Actions</th>
+		</tr>
+		<tr>
+			<td><input class="record_entry" type="text" value="Programming"></td>
+			<td><input class="record_entry" type="time" value="22:53"></td>
+			<td><input class="record_entry" type="text" value="2m 49s"></td>
+			<td><input type="button" value="Delete" onclick="deleteRow(this)"></td>
+		</tr>
+		<tr>
+			<td><input class="record_entry" type="text" value="Cooking"></td>
+			<td><input class="record_entry" type="time" value="06:30"></td>
+			<td><input class="record_entry" type="text" value="39m 10s"></td>
+			<td><input type="button" value="Delete" onclick="deleteRow(this)"></td>
+		</tr>
+	</table>
+</body>
+
+ <script type="text/javascript" src="script.js"></script>
+</html>

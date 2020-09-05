@@ -1,6 +1,8 @@
 Hi {{user.username}},   <a href="{% url 'logout' %}?next=/accounts/login/">logout</a></p>      
 
 
+
+<!-- need table here -->
 {% if records %}
     <ul>
     {% for record in records %}
@@ -10,3 +12,4 @@ Hi {{user.username}},   <a href="{% url 'logout' %}?next=/accounts/login/">logou
 {% else %}
     <p>No stopwatches are available.</p>
 {% endif %}
+
