@@ -81,15 +81,14 @@ function startClock(){
 }	
 
 function resetClock(){
-	if(clockRunning){
-		window.clearInterval(thread);
-		clockRunning = false;
-		ms = 0
-		seconds = 0;
-		minutes = 0;
-		hours = 0;
-		today = new Date();
-	}
+	window.clearInterval(thread);
+	clockRunning = false;
+	ms = 0
+	seconds = 0;
+	minutes = 0;
+	hours = 0;
+	today = new Date();
+	
 	document.getElementById("clock").innerHTML = "0s:0";
 	document.getElementById("clock").style.color = "#666666";
 	document.getElementById("start_btn").innerHTML = "START";
@@ -100,13 +99,35 @@ function resetClock(){
 function deleteRow(r) {
   //console.log("delete pressed");
 
-  var records_table = document.getElementById("records_table");
-  var i = r.parentNode.parentNode.rowIndex;
-  records_table.deleteRow(i);
-  if(records_table.rows.length==1){
-	records_table.style.visibility = "hidden";
-  }
+	var records_table = document.getElementById("records_table");
+	var i = r.parentNode.parentNode.rowIndex;
+	records_table.deleteRow(i);
+	if(records_table.rows.length==1){
+		records_table.style.visibility = "hidden";
+	}
+
+	// find the longestTime
+	// updateTable
+
+	// clear table
+	var tableRows = records_table.getElementsByTagName('tr');
+	var n = tableRows.length;
+	for (var x=tableRows.length-1; x>0; x--) {
+		records_table.deleteRow(x);
+	}
+
+	// remove an entry from an array
+	// i - j
+	// 0
+	// 1 - 2
+	// 2 - 1 
+	// 3 - 0 
+	var j = n-i;
+	records.splice(j, 1);
+	
+	parseRecords();
 }
+
 
 
 function createRow() {
@@ -128,10 +149,22 @@ function createRow() {
   }  
   
   var seconds = timeToSeconds(duration_time);
+
+  records.push({activity:activity_name, start:start_time, duration:duration_time });
+
   if(seconds<longestTime){
 	addRow(activity_name, start_time, duration_time, seconds/longestTime);
   }
+  else {
+	// progress bar affects other entries, reload the table
+	var tableRows = table.getElementsByTagName('tr');
+	for (var x=tableRows.length-1; x>0; x--) {
+		table.deleteRow(x);
+	}
+	parseRecords();
+  }
   resetClock();
+  document.getElementById("question").value="";
 }
 
 
@@ -227,24 +260,33 @@ var response = '{ "records" : [' +
 
 var obj = JSON.parse(response);
 var records = obj.records;
-var durations = [];
+
+records.push({activity:"Cooking", start:"18:30", duration:"00:00:15" });
+console.log(records);
 
 
 // find longest time
 var longestTime = 0;
+var durations = [];
 
-records.forEach(function (item) {
-	var curr = timeToSeconds(item.duration);
-	//console.log(curr);
-	durations.push(curr);
-	if(longestTime < curr){
-		longestTime = curr;
-	}
-  });
-//console.log(longestTime);
+function parseRecords(){
+	durations = [];
+	longestTime = 0;
+	records.forEach(function (item) {
+		var curr = timeToSeconds(item.duration);
+		//console.log(curr);
+		durations.push(curr);
+		if(longestTime < curr){
+			longestTime = curr;
+		}
+	  });
+	//console.log(longestTime);
+	
+	// add rows to the table
+	records.forEach(function (item, index) {
+		var progress = durations[index]/longestTime;
+		addRow(item.activity,item.start,item.duration, progress);
+	  });
+}
 
-// add rows to the table
-records.forEach(function (item, index) {
-	var progress = durations[index]/longestTime;
-	addRow(item.activity,item.start,item.duration, progress);
-  });
+parseRecords();
