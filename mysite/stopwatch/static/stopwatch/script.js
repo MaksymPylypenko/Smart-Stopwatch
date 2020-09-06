@@ -238,13 +238,15 @@ function setProgress(svg, value){
 	.attr("width", w)
 	.style("fill", "#222222");
   
-  var progress = svg.selectAll(null)
+  if(value>0){
+	var progress = svg.selectAll(null)
 	.data([w])
 	.enter()
 	.append("rect")
 	.attr("height", h)
 	.attr("width", value*w)
 	.style("fill", "#5A6BFF");
+  }  
 }
 
 // var svg = d3.select("svg");

@@ -7,6 +7,6 @@ app_name = 'stopwatch'
 urlpatterns = [
     # ex: /stopwatch/
     path('', views.index, name='index'),
-    # ex: /stopwatch/5/
-    path('<int:user_id>/', views.chart, name='chart'),
+    # ex: /stopwatch/records/
+    path('records/', views.records, name='records'),
 ]

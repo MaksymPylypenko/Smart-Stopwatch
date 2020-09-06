@@ -1,15 +1,48 @@
-Hi {{user.username}},   <a href="{% url 'logout' %}?next=/accounts/login/">logout</a></p>      
+<!DOCTYPE html>
+<html lang="en">
 
+<head>  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stopwatch</title>
+ 
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+ 
+  <!-- Styles -->  
 
+  {% load static %}
+  <link rel='stylesheet' href="{% static 'stopwatch/style.css' %}">
+</head>
 
-<!-- need table here -->
-{% if records %}
-    <ul>
-    {% for record in records %}
-        <li>{{ record.activity }}, start time = {{ record.start_time}}, duration = {{ record.duration}}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No stopwatches are available.</p>
-{% endif %}
+ 
 
+<body>  
+	<a href="{% url 'logout' %}?next=/accounts/login/">logout</a>  
+	<h1>Hello, {{user.username}}</h1>	
+	<input type="text" id="question" placeholder="What is your current activity?"> 
+	
+	<div id="clock">0s:0</div>
+	
+	<button class="button disabled" id="reset_btn" onclick="resetClock()">RESET</button>
+	<button class="button" id="start_btn" onclick="startClock()">START</button>	
+	<button class="button disabled" id="save_btn" onclick="createRow()">FINISH</button> 
+	
+	
+	<table id="records_table" style="visibility: hidden">
+		<tr>
+			<th class="record_title">Activity</th>
+			<th class="record_title">Start time</th>
+			<th class="record_title">Duration</th>
+			<th class="record_title"></th>
+			<th class="record_title"></th>
+		</tr>		
+	</table>
+
+	
+	
+</body>
+
+ <script src="https://d3js.org/d3.v6.min.js"></script>
+ <script src="{% static "stopwatch/script.js" %}" type="text/javascript"></script>
+
+</html>
