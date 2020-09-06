@@ -6,9 +6,9 @@
   <title>Stopwatch</title>
  
   <!-- Font -->
- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
  
- <!-- Styles -->  
+  <!-- Styles -->  
   <link rel="stylesheet" href="style.css">    
 </head>
 
@@ -31,22 +31,23 @@
 			<th class="record_title">Activity</th>
 			<th class="record_title">Start time</th>
 			<th class="record_title">Duration</th>
-			<th class="record_title">Actions</th>
+			<th class="record_title"></th>
+			<th class="record_title"></th>
 		</tr>
 		<tr>
 			<td><input class="record_entry" type="text" value="Programming"></td>
 			<td><input class="record_entry" type="time" value="22:53"></td>
-			<td><input class="record_entry" type="text" value="2m 49s"></td>
-			<td><input type="button" value="Delete" onclick="deleteRow(this)"></td>
-		</tr>
-		<tr>
-			<td><input class="record_entry" type="text" value="Cooking"></td>
-			<td><input class="record_entry" type="time" value="06:30"></td>
-			<td><input class="record_entry" type="text" value="39m 10s"></td>
-			<td><input type="button" value="Delete" onclick="deleteRow(this)"></td>
+			<td><input class="record_entry" type="text" value="1h:20m:20s"></td>
+			<td><svg width="100" height="12"></svg></td>
+			<td><input type="button" value="⨉" onclick="deleteRow(this)"></td>
 		</tr>
 	</table>
+
+	
+	
 </body>
 
+ <script src="https://d3js.org/d3.v6.min.js"></script>
  <script type="text/javascript" src="script.js"></script>
+
 </html>
