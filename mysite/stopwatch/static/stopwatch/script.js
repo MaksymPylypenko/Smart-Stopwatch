@@ -87,26 +87,6 @@ var local_records = [];
 var maxDuration = 0;
 var table = document.getElementById("records_table");
 
-function deleteRow(r) {
-  //console.log("delete pressed")
-	var i = r.parentNode.parentNode.rowIndex;
-	table.deleteRow(i);
-
-	var n = table.rows.length;
-	if(n==1){
-		table.style.visibility = "hidden";
-	}
-
-	// No need to fetch all records again, can simply remove the recod in a local copy 
-	// and rebuild the table using the current longest time..	
-	
-	for (var i=n-1; i>0; i--) {
-		table.deleteRow(i);
-	}
-	local_records.splice(n-1, 1);	
-	buildTable(local_records);
-}
-
 
 function appendRow(activity_name, start_time, duration_hhmmss, progress_percentage) {
 	
@@ -211,12 +191,8 @@ function makeRecord() {
 	var duration_time = clockTime();
 	var seconds = clockSeconds();
 			
-	// Need to send a POST request here...
-	// TODO
-	// If 200, then
 	var new_record = {activity:activity_name, start:start_time, duration:seconds};
 	
-
   	// // send post 
   	var req = new XMLHttpRequest();
 	req.open("POST", "records/create/", true);
@@ -230,18 +206,62 @@ function makeRecord() {
 		if (req.status == 200){
 			var obj = JSON.parse(req.responseText);			
 			new_record.id = obj.id;
-			console.log(new_record);
+			//console.log(new_record);
 			local_records.push(new_record);
+
+			// We only want to rebuild the table if the longest time was changed
+			seconds<maxDuration ? appendRow(activity_name, start_time, duration_time, seconds/maxDuration) : updateTable();
+			resetClock(); 
 		}
 		else{
 			alert("Your new Time Record did not reach the server!");
 		}
 	};
 
-	// We only want to rebuild the table if the longest time was changed
-	seconds<maxDuration ? appendRow(activity_name, start_time, duration_time, seconds/maxDuration) : updateTable();
-	resetClock(); 
+	
 }
+
+
+function deleteRow(r) {
+	  var i = r.parentNode.parentNode.rowIndex;
+	  table.deleteRow(i);
+  
+	  var n = table.rows.length;
+	  if(n==1){
+		  table.style.visibility = "hidden";
+	  }
+  
+	  var local_index = n-i;
+	  var pk = local_records[local_index].id;
+
+	  // delete request
+	  var req = new XMLHttpRequest();
+	  req.open("POST", "records/delete/", true);
+	  req.setRequestHeader('Content-Type', 'application/json');
+	  req.setRequestHeader("X-CSRFToken", csrftoken);
+	  req.send(JSON.stringify({id:pk}));
+  
+	  req.onreadystatechange = function() { 
+	  // If the request completed, close the extension popup
+	  if (req.readyState == 4)
+		  if (req.status == 200){
+			  // all good
+		  }
+		  else{
+			  alert("Your deletion request did not reach the server!");
+		  }
+	  };
+  
+	  // No need to fetch all records again, can simply remove the recod in a local copy 
+	  // and rebuild the table using the current longest time..	
+	  
+	  for (var i=n-1; i>0; i--) {
+		  table.deleteRow(i);
+	  }
+
+	  local_records.splice(local_index, 1);	
+	  buildTable(local_records);
+  }
 
 
 /// Converters

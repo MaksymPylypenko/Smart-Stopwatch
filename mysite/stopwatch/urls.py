@@ -10,4 +10,5 @@ urlpatterns = [
     # ex: /stopwatch/records/
     path('records/', views.records, name='records'),
     path('records/create/', views.create, name='create'),
+    path('records/delete/', views.delete, name='delete'),
 ]
