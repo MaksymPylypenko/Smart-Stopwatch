@@ -12,3 +12,18 @@ def index(request):
 def records(request):
     records = Record.objects.filter(user=request.user).values()  
     return JsonResponse({'records':list(records)})
+
+
+# def create(request):
+#     form= UserPostForm(request.POST or None)
+    
+
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             ###
+#             form.save()
+#         return HttpResponse("/Blog/posts/")
+
+    
+    
+#     HttpResponse("/Blog/posts/")
