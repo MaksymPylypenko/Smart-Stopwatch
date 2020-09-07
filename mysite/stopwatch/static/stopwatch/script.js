@@ -1,65 +1,19 @@
-// Clock
+fetchRecords(); // load user's data first
+
+
+/// Stopwatch
 
 var ms = 0
 var seconds = 0;
 var minutes = 0;
 var hours = 0;
 var clockRunning = false; 
+var startTimeSet = false;
 var today = new Date();
 
 
-// Converters
-function timeToSeconds(hhmmss){
-	var time = hhmmss.split(':');
-	var seconds = (time[0]) * 60 * 60 + (time[1]) * 60 + (time[2]);  // minutes are worth 60 seconds. Hours are worth 60 minutes.
-	return seconds;
-}
-
-function durationToTime(duration){
-	// convert django's duration to HH:MM:SS
-	var hh = duration.slice(4,6);
-	var mm = duration.slice(7,9);
-	var ss = duration.slice(10,12);
-	return hh+':'+mm+':'+ss;
-}
-
-function currentTime(){ // hh:mm:ss format
-	var time = "";
-	if(hours == 0) {time = time +'00:';}
-	else if(hours<10) {	time = time +'0'+hours+":";}
-	else{time = time+hours+":";}
-
-	if(minutes == 0) {time = time +'00:';}
-	else if(minutes<10) {time = time +'0'+minutes+":";}
-	else{time = time+minutes+":";}
-
-	if(seconds == 0) {time = time +'00';}
-	else if(seconds<10) {time = time +'0'+seconds;}
-	else{time = time+seconds;}
-
-	return time;
-}
-
-function currentDuration(){ // e.g. P0DT00H01M10S 
-	var time = "P0DT";
-	if(hours == 0) {time = time +'00:';}
-	else if(hours<10) {	time = time +'0'+hours+":";}
-	else{time = time+hours+"H";}
-
-	if(minutes == 0) {time = time +'00:';}
-	else if(minutes<10) {time = time +'0'+minutes+":";}
-	else{time = time+minutes+"M";}
-
-	if(seconds == 0) {time = time +'00';}
-	else if(seconds<10) {time = time +'0'+seconds;}
-	else{time = time+seconds+"S";}
-	return time;
-}
-
-// Primaty functions
 function stopWatch(){
-	ms++;
-	
+	ms++;	
 	if( ms == 10){
 		ms = 0; 
 		seconds++;
@@ -71,17 +25,14 @@ function stopWatch(){
 				hours++;
 			}
 		}
-	}
-		
+	}		
 	value = "";
 	if(hours>0){
 		value = value+hours+"h:";
-	}
-	
+	}	
 	if(minutes>0){
 		value= value+minutes+"m:";
-	}
-	 
+	}	 
 	value = value+seconds+"s:";	
 	document.getElementById("clock").innerHTML = value+ms;
 }
@@ -89,6 +40,11 @@ function stopWatch(){
 
 function startClock(){
 	if(!clockRunning){
+		if(!startTimeSet){
+			today = new Date();
+			startTimeSet = true;
+		}
+		
 		thread = window.setInterval(stopWatch,100);
 		document.getElementById("start_btn").innerHTML = "PAUSE";
 		document.getElementById("clock").style.color = "#FFFFFF";
@@ -105,99 +61,60 @@ function startClock(){
 	clockRunning = !clockRunning;
 }	
 
+
 function resetClock(){
 	window.clearInterval(thread);
 	clockRunning = false;
+	startTimeSet = false;
 	ms = 0
 	seconds = 0;
 	minutes = 0;
 	hours = 0;
-	today = new Date();
+	
 	
 	document.getElementById("clock").innerHTML = "0s:0";
 	document.getElementById("clock").style.color = "#666666";
 	document.getElementById("start_btn").innerHTML = "START";
 	document.getElementById("reset_btn").classList.add("disabled");
 	document.getElementById("save_btn").classList.add("disabled");	
+	document.getElementById("question").value="";
 }	
 
-function deleteRow(r) {
-  //console.log("delete pressed");
 
-	var table = document.getElementById("records_table");
+/// Table actions
+
+var local_records = [];
+var maxDuration = 0;
+var table = document.getElementById("records_table");
+
+function deleteRow(r) {
+  //console.log("delete pressed")
 	var i = r.parentNode.parentNode.rowIndex;
 	table.deleteRow(i);
-	if(table.rows.length==1){
+
+	var n = table.rows.length;
+	if(n==1){
 		table.style.visibility = "hidden";
 	}
 
-	// clear table
-	var tableRows = table.getElementsByTagName('tr');
-	var n = tableRows.length;
-	for (var x=tableRows.length-1; x>0; x--) {
-		table.deleteRow(x);
-	}
-
-	// remove an entry from an array
-	// i - j
-	// 0
-	// 1 - 2
-	// 2 - 1 
-	// 3 - 0 
-	var j = n-i;
-	records.splice(j, 1);
+	// No need to fetch all records again, can simply remove the recod in a local copy 
+	// and rebuild the table using the current longest time..	
 	
-	parseRecords();
+	for (var i=n-1; i>0; i--) {
+		table.deleteRow(i);
+	}
+	local_records.splice(n-1, 1);	
+	buildTable(local_records);
 }
 
 
-
-function createRow() {
-
-  var duration_time = currentTime();
-
-  var h = today.getHours() < 10 ? h ="0"+today.getHours() : h = today.getHours();
-  var m = today.getMinutes() < 10 ? m ="0"+today.getMinutes() : m = today.getMinutes();  
-  var start  = h+':'+m;
-
-  var table = document.getElementById("records_table");
-  var activity = document.getElementById("question");
-  var rowIndex = table.rows.length;
-  var activity_name = "";
-  if(activity.value == ""){
-	activity_name = "Activity "+(rowIndex-1); 
-  }else{
-	activity_name = activity.value;
-  }  
-  
-  var seconds = timeToSeconds(duration_time);
-  records.push({activity:activity_name, start_time:start, duration:currentDuration()});
-
-  if(seconds<longestTime){
-	addRow(activity_name, start, duration_time, seconds/longestTime);
-  }
-  else {
-	// progress bar affects other entries, reload the table
-	var tableRows = table.getElementsByTagName('tr');
-	for (var x=tableRows.length-1; x>0; x--) {
-		table.deleteRow(x);
-	}
-	parseRecords();
-  }
-  resetClock();
-  document.getElementById("question").value="";
-}
-
-
-function addRow(activity_name, start_time, duration, progress_percentage) {
-	var table = document.getElementById("records_table");
+function appendRow(activity_name, start_time, duration_hhmmss, progress_percentage) {
 	
-	if(table.rows.length==1){
+	if(table.rows.length==1){ // show up, if inserting the first element
 	  records_table.style.visibility = "visible";
 	}
   
-	var row = table.insertRow(1);
-  
+	var row = table.insertRow(1); // always insert from the top  
 	var cell1 = row.insertCell(0);
 	var cell2 = row.insertCell(1);
 	var cell3 = row.insertCell(2);
@@ -208,7 +125,7 @@ function addRow(activity_name, start_time, duration, progress_percentage) {
 	var duration_input = document.createElement("input"); 
 	duration_input.className = 'record_entry';  
 	duration_input.style.type ='text';  
-	duration_input.value = duration;  
+	duration_input.value = duration_hhmmss;  
 	cell3.appendChild(duration_input);
 	
 	// Activity name
@@ -231,104 +148,179 @@ function addRow(activity_name, start_time, duration, progress_percentage) {
 	cell2.appendChild(start_input);  
   
 	// Progress bar
-	var svg = d3.create("svg");
-  
+	var svg = d3.create("svg");  
 	svg
 	.attr("width", 100)
-	.attr("height", 12);
-  
+	.attr("height", 12);  
 	setProgress(svg, progress_percentage);
 	d3.select(cell4).append(() => svg.node());
   }
 
 
+function buildTable(records){
+	// find the longest 
+	maxDuration = 0;
+	records.forEach(function (item) {		
+		if(maxDuration < item.duration){
+			maxDuration = item.duration;
+		}
+	});
+	
+	// build the table
+	records.forEach(function (item) {
+		var progress = item.duration/maxDuration;
+		var duration = secondsToHHMMSS(item.duration);
+		var start, n = item.start.length;
+		n>5 ? start = item.start.substring(0,n-3) : start = item.start;  // remove seconds '00' and ':'	
+		appendRow(item.activity,start,duration,progress);
+	});
+}
+
+
+function updateTable(){
+	var n = table.getElementsByTagName('tr').length;
+	for (var i=n-1; i>0; i--) {
+		table.deleteRow(i);
+	}
+	buildTable(local_records);	  	
+}	
+
+
+
+/// Client-server communication
+
+function fetchRecords() {
+	var req = new XMLHttpRequest();
+	req.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {  
+			var obj = JSON.parse(this.responseText);	
+			console.log(this.responseText);
+			local_records = obj.records;	
+			buildTable(local_records);	  		
+		}
+		
+	};
+	req.open("GET","records/", true);
+	req.send();  
+  }
+
+
+function makeRecord() {  
+	var activity_name = currActivity();
+	var start_time = currStartTime();
+	var duration_time = clockTime();
+	var seconds = clockSeconds();
+			
+	// Need to send a POST request here...
+	// TODO
+	// If 200, then
+	var new_record = {activity:activity_name, start:start_time, duration:seconds};
+	
+
+  	// // send post 
+  	var req = new XMLHttpRequest();
+	req.open("POST", "records/create/", true);
+	req.setRequestHeader('Content-Type', 'application/json');
+	req.setRequestHeader("X-CSRFToken", csrftoken);
+	req.send(JSON.stringify(new_record));
+
+	req.onreadystatechange = function() { 
+	// If the request completed, close the extension popup
+	if (req.readyState == 4)
+		if (req.status == 200){
+			var obj = JSON.parse(req.responseText);			
+			new_record.id = obj.id;
+			console.log(new_record);
+			local_records.push(new_record);
+		}
+		else{
+			alert("Your new Time Record did not reach the server!");
+		}
+	};
+
+	// We only want to rebuild the table if the longest time was changed
+	seconds<maxDuration ? appendRow(activity_name, start_time, duration_time, seconds/maxDuration) : updateTable();
+	resetClock(); 
+}
+
+
+/// Converters
+
+function secondsToHHMMSS(seconds){
+	var date = new Date(null);
+	date.setSeconds(seconds); // specify value for SECONDS here
+	return date.toISOString().substr(11, 8);
+}
+
+function timeToSeconds(hhmmss){
+	var time = hhmmss.split(':');
+	var seconds = (time[0]) * 60 * 60 + (time[1]) * 60 + (time[2]);  // minutes are worth 60 seconds. Hours are worth 60 minutes.
+	return seconds;
+}
+
+function clockTime(){ // hh:mm:ss format
+	var time = "";
+	if(hours == 0) {time = time +'00:';}
+	else if(hours<10) {	time = time +'0'+hours+":";}
+	else{time = time+hours+":";}
+
+	if(minutes == 0) {time = time +'00:';}
+	else if(minutes<10) {time = time +'0'+minutes+":";}
+	else{time = time+minutes+":";}
+
+	if(seconds == 0) {time = time +'00';}
+	else if(seconds<10) {time = time +'0'+seconds;}
+	else{time = time+seconds;}
+
+	return time;
+}
+
+function clockSeconds(){
+	return hours*60*60 + minutes*60 + seconds;
+}
+
+
+
+/// Utility 
+
+function currActivity(){
+	var activity = document.getElementById("question");
+	var rowIndex = table.rows.length;
+	var activity_name = "";
+	activity.value == "" ? activity_name = "Activity "+(rowIndex-1) : activity_name = activity.value;
+	return activity_name;
+}
+
+function currStartTime(){
+	var h = today.getHours() < 10 ? h ="0"+today.getHours() : h = today.getHours();
+	var m = today.getMinutes() < 10 ? m ="0"+today.getMinutes() : m = today.getMinutes();  
+	return h+':'+m;
+}
+
 
 
 /// Progress bar
+
 function setProgress(svg, value){
 
-  var w = svg.attr("width");
-  var h = svg.attr("height");
-
-  var background = svg.selectAll(null)
-	.data([value*w])
-	.enter()
-	.append("rect")
-	.attr("height", h)
-	.attr("width", w)
-	.style("fill", "#222222");
+	var w = svg.attr("width");
+	var h = svg.attr("height");
   
-  if(value>0){
-	var progress = svg.selectAll(null)
-	.data([w])
-	.enter()
-	.append("rect")
-	.attr("height", h)
-	.attr("width", value*w)
-	.style("fill", "#5A6BFF");
-  }  
-}
-
-// var svg = d3.select("svg");
-// setProgress(svg, 12, 100)
-  
-
-
-/////
-
-var records = [];
-
-function fetchRecords() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = function() {
-
-		if (this.readyState == 4 && this.status == 200) {  
-			var obj = JSON.parse(this.responseText);	
-			records = obj.records;		  		
-		}
-		// else{
-		// 	response = '{ "records" : [' +
-		// 	'{ "activity":"Programming" , "start_time":"13:30", "duration":"00:00:20" },' +
-		// 	'{ "activity":"Gym" , "start_time":"10:00", "duration":"00:00:40" }]}';
-		// }
-
-		
-		//records.push({activity:"Cooking", start:"18:30", duration:"00:00:15" });
-
-		// console.log(records);
-		parseRecords();
-	};
-	xhttp.open("GET","records/", true);
-	xhttp.send();  
-  }
-fetchRecords();
-
-
-// find longest time
-var longestTime = 0;
-var durations = [];
-
-function parseRecords(){
-	durations = [];
-	longestTime = 0;
-	records.forEach(function (item) {
-		var time;
-		item.duration.charAt(0)=='P' ? time = durationToTime(item.duration) : time = item.duration;
-		var curr = timeToSeconds(time); // TODO, maybe I should change the format..
-		//console.log(curr);
-		durations.push(curr);
-		if(longestTime < curr){
-			longestTime = curr;
-		}
-	  });
+	var background = svg.selectAll(null)
+	  .data([value*w])
+	  .enter()
+	  .append("rect")
+	  .attr("height", h)
+	  .attr("width", w)
+	  .style("fill", "#222222");
 	
-	// add rows to the table
-	records.forEach(function (item, index) {
-		var progress = durations[index]/longestTime;
-		var start = item.start_time; //.substring(0, item.start_time.length - 3); // remove seconds '00' and ':'
-
-		addRow(item.activity,start,durationToTime(item.duration), progress);
-	  });
-}
-
-parseRecords();
+	if(value>0){
+	  var progress = svg.selectAll(null)
+	  .data([w])
+	  .enter()
+	  .append("rect")
+	  .attr("height", h)
+	  .attr("width", value*w)
+	  .style("fill", "#5A6BFF");
+	}  
+  }
