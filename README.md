@@ -1,5 +1,7 @@
-# Smart Stopwatch
+# Stopwatch
 Track how much time you spent on different activities
+
+![preview](https://github.com/MaksymPylypenko/Smart-Stopwatch/blob/master/preview.png)
 
 ## Running
 1. Make sure you have [Django](https://www.djangoproject.com/download/) installed
@@ -18,5 +20,5 @@ Track how much time you spent on different activities
 * [x] A bar chart embeded in the table (reacts to changes in the table)
 
 ### Todo next
-* [ ] React to user's input in the table (e.g. change existing rows)
+* [ ] React to user's input (e.g. changing data in existing rows) in the table 
 * [ ] Group multiple activites.
